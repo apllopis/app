@@ -1,14 +1,34 @@
 import React from "react";
 import ReactDOM from "react-dom";
 import "./index.css";
-import App from "./App";
+import { useState } from "react";
+const rootElement = document.getElementById("root");
 
-ReactDOM.render(
-  <App />,
+const App = ({ inicial }) => {
+  const [contador, setContador] = useState(inicial);
 
-  document.getElementById("root")
-);
+  const handleClickAdd = () => {
+    setContador(contador + 1);
+  };
+  const handleClickReset = () => {
+    setContador(inicial);
+  };
+  const handleClickDec = () => {
+    setContador(contador - 1);
+  };
 
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
+  const isEven = contador % 2 === 0;
+  const mensaje = isEven ? "Par" : "Impar";
+
+  return (
+    <div>
+      <h1> Clase3</h1>
+      <h2>{contador}</h2>
+      <p>{mensaje} </p>
+      <button onClick={handleClickDec}>-</button>
+      <button onClick={handleClickReset}>Reset</button>
+      <button onClick={handleClickAdd}>+</button>
+    </div>
+  );
+};
+ReactDOM.render(<App inicial={0} />, rootElement);
