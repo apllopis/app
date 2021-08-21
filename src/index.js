@@ -2,7 +2,10 @@ import React from "react";
 import ReactDOM from "react-dom";
 import "./index.css";
 import { useState } from "react";
-
+const INI_COUNT_STATE = {
+  izda: 1,
+  dcha: 10,
+};
 const ListofClicks = ({ clicks }) => {
   return (
     <>
@@ -22,10 +25,8 @@ const Counter = ({ contador }) => {
 const rootElement = document.getElementById("root");
 
 const App = () => {
-  const [contador, setContador] = useState({
-    izda: 0,
-    dcha: 0,
-  });
+  const [contador, setContador] = useState(INI_COUNT_STATE);
+
   const [clicks, setClicks] = useState([]);
 
   const handleClickLeft = () => {
@@ -38,12 +39,7 @@ const App = () => {
   };
 
   const handleClickReset = () => {
-    const nuevoEstadoContador = {
-      ...contador,
-      izda: 0,
-      dcha: 0,
-    };
-    setContador(nuevoEstadoContador);
+    setContador(INI_COUNT_STATE);
     setClicks((prevClicks) => [...prevClicks, "Rst"]);
   };
   const handleClickRight = () => {
