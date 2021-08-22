@@ -1,18 +1,11 @@
 /** comno es otra lista distinta tambien hay que poner la key */
-const Note = ({ categories = [], content, date }) => {
+const Note = ({ title, body }) => {
   return (
     <li>
       <p>
-        <strong>{content}</strong>
+        <strong>{title}</strong>
       </p>
-      <small>
-        <time>{date}</time>
-      </small>
-      <div>
-        {categories.map((categoria) => (
-          <small key={categoria}>{categoria} </small>
-        ))}
-      </div>
+      <small>{body}</small>
     </li>
   );
 };

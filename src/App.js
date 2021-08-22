@@ -4,32 +4,38 @@
  * se tiene que importar como :
  *  import {Note} from "./components/Note.js"
  */
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import "./App.css";
 import Note from "./components/Note";
 
 /**  Se pasa una props a App y si no le llega
  * nada se crea como un array vacío
  */
-function App({ notes = [] }) {
-  const [notas, setNotas] = useState(notes);
+function App() {
+  const [notas, setNotas] = useState([]);
   const [nuevaNota, setNuevaNota] = useState("");
-  const [showAll, setShowAll] = useState(true);
+  /** Se necesita un useEfect para que al hacer el setNotas
+   * no se vuelva a renderizar el fetch y entre en bucle
+   */
+  useEffect(() => {
+    fetch("https://jsonplaceholder.typicode.com/posts")
+      .then((response) => response.json())
+      .then((json) => {
+        setNotas(json);
+      });
+  }, []);
+
   const handleChange = (event) => {
     setNuevaNota(event.target.value);
   };
 
-  const handleShowAll = () => {
-    setShowAll(() => !showAll);
-  };
   const handleSubmit = (event) => {
     event.preventDefault();
     const notaToAddToState = {
       id: notas.length + 1,
-      content: nuevaNota,
-      date: new Date().toISOString(),
-      important: Math.random() < 0.55, // para que varíe
-      categories: ["mantenimiento"],
+      userId: 1501,
+      title: nuevaNota,
+      body: nuevaNota,
     };
     /**  [notas.concat(notaToAddToState)]
      *  version con concat
@@ -55,23 +61,10 @@ function App({ notes = [] }) {
   return (
     <div>
       <h1>Mantenimientos</h1>
-      <button onClick={handleShowAll}>
-        {showAll ? "Sólo las notas importantes" : "Todas las notas"}
-      </button>
       <ol>
-        {notas
-          .filter((note) => {
-            if (showAll === true) return true;
-            return note.important === true;
-          })
-          .map((note) => (
-            <Note
-              categories={note.categories}
-              content={note.content}
-              date={note.date}
-              key={note.id}
-            />
-          ))}
+        {notas.map((note) => (
+          <Note {...note} key={note.id} />
+        ))}
       </ol>
       <form onSubmit={handleSubmit}>
         <input type="text" onChange={handleChange} value={nuevaNota} />
