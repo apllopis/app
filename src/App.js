@@ -36,9 +36,9 @@ function App() {
   const handleSubmit = (event) => {
     event.preventDefault();
     const notaToAddToState = {
-      userId: 1501,
-      title: nuevaNota,
-      body: nuevaNota,
+      content: nuevaNota,
+      date: new Date().toISOString(),
+      important: Math.random() < 0.55, // para que varíe
     };
     createNota(notaToAddToState).then((newNote) => {
       setNotas((prevNotas) => prevNotas.concat(newNote));

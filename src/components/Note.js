@@ -1,11 +1,13 @@
 /** comno es otra lista distinta tambien hay que poner la key */
-const Note = ({ title, body }) => {
+const Note = ({ content, date }) => {
   return (
     <li>
       <p>
-        <strong>{title}</strong>
+        <strong>{content}</strong>
       </p>
-      <small>{body}</small>
+      <small>
+        <time>{date}</time>
+      </small>
     </li>
   );
 };

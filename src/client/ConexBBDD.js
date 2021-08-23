@@ -10,7 +10,11 @@ export const getAllNotas = () => {
 };
 export const createNota = ({ title, body, userId }) => {
   return axios
-    .post("https://jsonplaceholder.typicode.com/posts", { title, body, userId })
+    .post("https://jsonplaceholder.typicode.com/posts", {
+      content,
+      date,
+      important,
+    })
     .then((response) => {
       const { data } = response;
       return data;
