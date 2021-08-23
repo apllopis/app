@@ -7,22 +7,26 @@
 import { useState, useEffect } from "react";
 import "./App.css";
 import Note from "./components/Note";
-
+import { getAllNotas, createNota } from "./client/ConexBBDD";
 /**  Se pasa una props a App y si no le llega
  * nada se crea como un array vacío
  */
 function App() {
   const [notas, setNotas] = useState([]);
   const [nuevaNota, setNuevaNota] = useState("");
+  const [loading, setLoading] = useState(false);
   /** Se necesita un useEfect para que al hacer el setNotas
    * no se vuelva a renderizar el fetch y entre en bucle
    */
   useEffect(() => {
-    fetch("https://jsonplaceholder.typicode.com/posts")
-      .then((response) => response.json())
-      .then((json) => {
-        setNotas(json);
-      });
+    setLoading(true);
+    /** getAllRegister devuelve la funcion  asincrona que devuelve data que se pasa
+     * a setNotas
+     */
+    getAllNotas().then((data) => {
+      setNotas(data);
+      setLoading(false);
+    });
   }, []);
 
   const handleChange = (event) => {
@@ -32,17 +36,14 @@ function App() {
   const handleSubmit = (event) => {
     event.preventDefault();
     const notaToAddToState = {
-      id: notas.length + 1,
       userId: 1501,
       title: nuevaNota,
       body: nuevaNota,
     };
-    /**  [notas.concat(notaToAddToState)]
-     *  version con concat
-     */
-
-    setNotas([...notas, notaToAddToState]);
-    setNuevaNota("");
+    createNota(notaToAddToState).then((newNote) => {
+      setNotas((prevNotas) => prevNotas.concat(newNote));
+      setNuevaNota("");
+    });
   };
 
   /**
@@ -61,6 +62,7 @@ function App() {
   return (
     <div>
       <h1>Mantenimientos</h1>
+      {loading ? "Cargando..." : ""}
       <ol>
         {notas.map((note) => (
           <Note {...note} key={note.id} />
