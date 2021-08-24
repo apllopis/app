@@ -5,9 +5,9 @@
  *  import {Note} from "./components/Note.js"
  */
 import { useState, useEffect } from "react";
-import "./App.css";
 import Note from "./components/Note";
-import { getAllNotas, createNota } from "./client/ConexBBDD";
+import noteSrv from './services/notes'
+
 /**  Se pasa una props a App y si no le llega
  * nada se crea como un array vacío
  */
@@ -15,19 +15,18 @@ function App() {
   const [notas, setNotas] = useState([]);
   const [nuevaNota, setNuevaNota] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showAll, setShowAll] = useState(true)
   /** Se necesita un useEfect para que al hacer el setNotas
    * no se vuelva a renderizar el fetch y entre en bucle
    */
   useEffect(() => {
     setLoading(true);
-    /** getAllRegister devuelve la funcion  asincrona que devuelve data que se pasa
-     * a setNotas
-     */
-    getAllNotas().then((data) => {
-      setNotas(data);
-      setLoading(false);
-    });
-  }, []);
+    noteSrv.getAll()
+      .then(inicialNotas => {
+        setNotas(inicialNotas)
+        setLoading(false)
+      })
+  }, [])
 
   const handleChange = (event) => {
     setNuevaNota(event.target.value);
@@ -37,14 +36,19 @@ function App() {
     event.preventDefault();
     const notaToAddToState = {
       content: nuevaNota,
-      date: new Date().toISOString(),
       important: Math.random() < 0.55, // para que varíe
     };
-    createNota(notaToAddToState).then((newNote) => {
-      setNotas((prevNotas) => prevNotas.concat(newNote));
-      setNuevaNota("");
-    });
+    noteSrv
+      .create(notaToAddToState)
+      .then(returnedNote => {
+        setNotas((prevNotas) => prevNotas.concat(returnedNote))
+        setNuevaNota("")
+      })
   };
+
+  const notesToShow = showAll
+    ? notas
+    : notas.filter(note => note.important)
 
   /**
    * la key en el elemento mas alto en este caso
@@ -63,8 +67,14 @@ function App() {
     <div>
       <h1>Mantenimientos</h1>
       {loading ? "Cargando..." : ""}
+      <div>
+        <button onClick={() => setShowAll(!showAll)}>
+          Ver {showAll ? 'solo Importantes' : 'todas'}
+        </button>
+      </div>
+
       <ol>
-        {notas.map((note) => (
+        {notesToShow.map((note) => (
           <Note {...note} key={note.id} />
         ))}
       </ol>

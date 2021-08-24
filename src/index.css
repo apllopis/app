@@ -12,5 +12,25 @@ code {
     monospace;
 }
 h1 {
-  text-align: center;
+  color: #81005e;
+  font-style: italic;
+}
+div {
+  padding-left: 8px;
+}
+
+.note {
+  color: #7d7a7d;
+  padding-top: 3px;
+  font-size: 15px;
+}
+
+.error {
+  color: red;
+  background: lightgrey;
+  font-size: 20px;
+  border-style: solid;
+  border-radius: 5px;
+  padding: 10px;
+  margin-bottom: 10px;
 }
