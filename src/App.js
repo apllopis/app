@@ -25,6 +25,7 @@ function App() {
       .then(inicialNotas => {
         setNotas(inicialNotas)
         setLoading(false)
+
       })
   }, [])
 
