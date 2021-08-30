@@ -7,6 +7,8 @@
 import { useState, useEffect } from "react";
 import Note from "./components/Note";
 import noteSrv from './services/notes'
+import Notification from "./components/Notification";
+import loginSrv from './services/login'
 
 /**  Se pasa una props a App y si no le llega
  * nada se crea como un array vacío
@@ -16,29 +18,62 @@ function App() {
   const [nuevaNota, setNuevaNota] = useState("");
   const [loading, setLoading] = useState(false);
   const [showAll, setShowAll] = useState(true)
+  const [errorMessage, setErrorMessage] = useState(null)
+  const [username, setUsername] = useState('')
+  const [password, setPassword] = useState('')
+  const [user, setUser] = useState({
+    name: '',
+    username: '',
+    token: null
+  })
   /** Se necesita un useEfect para que al hacer el setNotas
    * no se vuelva a renderizar el fetch y entre en bucle
    */
   useEffect(() => {
     setLoading(true);
-    noteSrv.getAll()
-      .then(inicialNotas => {
-        setNotas(inicialNotas)
-        setLoading(false)
 
-      })
-  }, [])
+    if (user.token) {
+      noteSrv.getAll()
+        .then(inicialNotas => {
+          setNotas(inicialNotas)
+          setLoading(false)
 
-  const handleChange = (event) => {
-    setNuevaNota(event.target.value);
-  };
+        })
+    }
+  }, [user])
 
+
+  const handleLogin = async (event) => {
+    event.preventDefault()
+
+    try {
+      const user = await loginSrv.login({ username, password })
+      setUser(user)
+      noteSrv.setToken(user.token)
+      setUsername('')
+      setPassword('')
+      // console.log(user)
+    } catch (error) {
+      setErrorMessage('Credenciales erróneas')
+      setTimeout(() => {
+        setErrorMessage('')
+      }, 5000)
+    }
+
+  }
+  const handleChangeUsername = (event) => {
+    setUsername(event.target.value)
+  }
+  const handleChangePassword = (event) => {
+    setPassword(event.target.value)
+  }
   const handleSubmit = (event) => {
     event.preventDefault();
     const notaToAddToState = {
       content: nuevaNota,
       important: Math.random() < 0.55, // para que varíe
     };
+
     noteSrv
       .create(notaToAddToState)
       .then(returnedNote => {
@@ -50,6 +85,57 @@ function App() {
   const notesToShow = showAll
     ? notas
     : notas.filter(note => note.important)
+
+  const renderLoginForm = () => (
+    <form onSubmit={handleLogin}>
+      <div>
+        <input
+          type='text'
+          value={username}
+          name='Username'
+          placeholder='Nombre usuario'
+          onChange={handleChangeUsername}
+        />
+      </div>
+      <div>
+        <input
+          type='password'
+          value={password}
+          name='Password'
+          placeholder=''
+          onChange={handleChangePassword}
+        />
+      </div>
+      <div>
+        <button>Login</button>
+      </div>
+    </form>
+  )
+  const renderCreateForm = () => (
+    <>
+      {loading ? "Cargando..." : ""}
+
+      <div>
+        <button onClick={() => setShowAll(!showAll)}>
+          Ver {showAll ? 'solo Importantes' : 'todas'}
+        </button>
+      </div>
+
+      <ol>
+        {notesToShow.map((note) => (
+          <Note {...note} key={note.id} />
+        ))}
+      </ol>
+      <form onSubmit={handleSubmit}>
+        <input
+          type="text"
+          onChange={(event) => setNuevaNota(event.target.value)}
+          value={nuevaNota}
+        />
+        <button>Grabar mantenimiento</button>
+      </form>
+    </>
+  )
 
   /**
    * la key en el elemento mas alto en este caso
@@ -67,22 +153,10 @@ function App() {
   return (
     <div>
       <h1>Mantenimientos</h1>
-      {loading ? "Cargando..." : ""}
-      <div>
-        <button onClick={() => setShowAll(!showAll)}>
-          Ver {showAll ? 'solo Importantes' : 'todas'}
-        </button>
-      </div>
+      <Notification message={errorMessage} />
+      {user.token ? renderCreateForm() : renderLoginForm()}
 
-      <ol>
-        {notesToShow.map((note) => (
-          <Note {...note} key={note.id} />
-        ))}
-      </ol>
-      <form onSubmit={handleSubmit}>
-        <input type="text" onChange={handleChange} value={nuevaNota} />
-        <button>Grabar mantenimiento</button>
-      </form>
+
     </div>
   );
 }
