@@ -6,10 +6,12 @@
  *  import {Note} from "./components/Note.js"
  */
 import { useState, useEffect } from "react";
-import Note from "./components/Note";
 import noteSrv from './services/notes'
 import Notification from "./components/Notification";
 import loginSrv from './services/login'
+import LoginForm from "./components/LoginForm";
+import NoteForm from "./components/NoteForm";
+import NotesShowForm from "./components/NotesShowForm";
 
 /**  Se pasa una props a App y si no le llega
  * nada se crea como un array vacío
@@ -18,7 +20,6 @@ function App() {
   const [notas, setNotas] = useState([]);
   const [nuevaNota, setNuevaNota] = useState("");
   const [loading, setLoading] = useState(false);
-  const [showAll, setShowAll] = useState(true)
   const [errorMessage, setErrorMessage] = useState(null)
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
@@ -64,7 +65,6 @@ function App() {
   }
   const handleLogin = async (event) => {
     event.preventDefault()
-
     try {
       const user = await loginSrv.login({ username, password })
       window.localStorage.setItem(
@@ -83,12 +83,6 @@ function App() {
     }
 
   }
-  const handleChangeUsername = (event) => {
-    setUsername(event.target.value)
-  }
-  const handleChangePassword = (event) => {
-    setPassword(event.target.value)
-  }
   const handleSubmit = (event) => {
     event.preventDefault();
     const notaToAddToState = {
@@ -103,64 +97,6 @@ function App() {
         setNuevaNota("")
       })
   };
-
-  const notesToShow = showAll
-    ? notas
-    : notas.filter(note => note.important)
-
-  const renderLoginForm = () => (
-    <form onSubmit={handleLogin}>
-      <div>
-        <input
-          type='text'
-          value={username}
-          name='Username'
-          placeholder='Nombre usuario'
-          onChange={handleChangeUsername}
-        />
-      </div>
-      <div>
-        <input
-          type='password'
-          value={password}
-          name='Password'
-          placeholder=''
-          onChange={handleChangePassword}
-        />
-      </div>
-      <div>
-        <button>Login</button>
-      </div>
-    </form>
-  )
-  const renderCreateForm = () => (
-    <>
-      {loading ? "Cargando..." : ""}
-      <div>
-        <button onClick={handleLogout}>Cerrar Sesión</button>
-      </div>
-      <div>
-        <button onClick={() => setShowAll(!showAll)}>
-          Ver {showAll ? 'solo Importantes' : 'todas'}
-        </button>
-      </div>
-
-      <ol>
-        {notesToShow.map((note) => (
-          <Note {...note} key={note.id} />
-        ))}
-      </ol>
-      <form onSubmit={handleSubmit}>
-        <input
-          type="text"
-          onChange={(event) => setNuevaNota(event.target.value)}
-          value={nuevaNota}
-        />
-        <button>Grabar mantenimiento</button>
-      </form>
-
-    </>
-  )
 
   /**
    * la key en el elemento mas alto en este caso
@@ -178,8 +114,32 @@ function App() {
   return (
     <div>
       <h1>Mantenimientos</h1>
+
       <Notification message={errorMessage} />
-      {user.token ? renderCreateForm() : renderLoginForm()}
+      {user.token ? <div>
+        <NotesShowForm
+          notas={notas}
+          loading={loading}
+          handleLogout={handleLogout}
+        />
+        <NoteForm
+          nuevaNota={nuevaNota}
+          handleChangeNote={({ target }) => setNuevaNota(target.value)}
+          handleSubmit={handleSubmit}
+        />
+      </div>
+        : <LoginForm
+          username={username}
+          password={password}
+          handlechangeUsername={
+            ({ target }) => setUsername(target.value)
+          }
+          handleChangePassword={
+            ({ target }) => setPassword(target.value)
+          }
+
+          handleSubmit={handleLogin}
+        />}
 
 
     </div>
