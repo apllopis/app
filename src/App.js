@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /**
  * Si el modulo se exporta como nombrado:
  *  export const Note = () =>{....}
@@ -42,14 +43,35 @@ function App() {
     }
   }, [user])
 
+  useEffect(() => {
+    const loggedUserJSON = window.localStorage.getItem('loggedNoteAppUser')
+    if (loggedUserJSON) {
+      const user = JSON.parse(loggedUserJSON)
+      setUser(user)
+      noteSrv.setToken(user.token)
+    }
+  }, [])
 
+  const handleLogout = () => {
+    const limpio = {
+      name: '',
+      username: '',
+      token: null
+    }
+    setUser(limpio)
+    noteSrv.setToken(user.token)
+    window.localStorage.removeItem('loggedNoteAppUser')
+  }
   const handleLogin = async (event) => {
     event.preventDefault()
 
     try {
       const user = await loginSrv.login({ username, password })
-      setUser(user)
+      window.localStorage.setItem(
+        'loggedNoteAppUser', JSON.stringify(user)
+      )
       noteSrv.setToken(user.token)
+      setUser(user)
       setUsername('')
       setPassword('')
       // console.log(user)
@@ -114,7 +136,9 @@ function App() {
   const renderCreateForm = () => (
     <>
       {loading ? "Cargando..." : ""}
-
+      <div>
+        <button onClick={handleLogout}>Cerrar Sesión</button>
+      </div>
       <div>
         <button onClick={() => setShowAll(!showAll)}>
           Ver {showAll ? 'solo Importantes' : 'todas'}
@@ -134,6 +158,7 @@ function App() {
         />
         <button>Grabar mantenimiento</button>
       </form>
+
     </>
   )
 
